@@ -3,9 +3,9 @@ from matplotlib import cm
 import numpy as np
 
 
-def new_draw(potentials: list, pic_size: tuple, real_pic: float, safe_zones: list, safe_radius: int, n: int, e: float):
-    width, height = pic_size = len(potentials), len(potentials[0])
-    width_m, height_m = round(width / real_pic), round(height / real_pic)
+def new_draw(potentials: list, real_size: tuple, safe_zones: list, safe_radius: int, n: int):
+    # width, height = pic_size = len(potentials), len(potentials[0])
+    width_m, height_m = real_size
     max_p = 0
     min_p = 0
     values = []
