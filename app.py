@@ -7,7 +7,6 @@ from potentials.config import draw_fun, get_results_fun, get_min_range, potentia
 
 from gui import init
 
-
 calc_filename = ''
 
 e = 0.0001
@@ -19,19 +18,38 @@ plot = None
 potentials = None
 safe_zones = None
 show_plot_b = False
-calculate_b = False
-draw_plot_b = False
-callback_b = False
+# TODO: система сохранения и октрытия вычесленных моделей
 
 
 def callback():
-    callback_b = True
+    # TODO: уведомление при получении результате
+    pass
+
+
+def show_close_hook():
+    global show_plot_b
+    # TODO: просьба закрыть окно графика, если оно открыто
+
+    show_plot_b = not show_plot_b
+
+
+def draw(real_size):
+    global potentials, safe_zones, safe_radius, plot
+    try:
+        # TODO: уведомление(подтверждение отрисовки) + проверка на наличие графика
+        print('drawing')
+        plot = draw_fun(potentials, real_size, safe_zones, safe_radius, n)
+        print('drawn')
+        callback()
+    except Exception as ex:
+        print(ex)
 
 
 def calculate(qs: dict, size: tuple):
     global potentials, safe_zones, safe_radius
     if not qs:
         raise Exception
+    print('calculating')
     width, height = size
     potentials = [([0] * width) for _ in range(height)]
     safe_zones = [([0] * width) for _ in range(height)]
@@ -51,8 +69,9 @@ def calculate(qs: dict, size: tuple):
             potentials[y][x] = potential(qs, (x, y), safe_radius)
             # TODO: safe_zones как побочный продукт potentials
             safe_zones[y][x] = get_min_range(qs, (x, y))
-    # TODO: отправка сообщений в круг
 
+    print('calculated')
+    # TODO: отправка сообщений в круг
     callback()
 
 
@@ -68,11 +87,14 @@ class Hook:
 
 
 class Gui:
-
-    def __init__(self, calc_hook):
+    # TODO: создать систему уведомлений
+    def __init__(self, calc_hook, draw_hook):
         init(self)
-        args = [self.qs, self.size]
-        self.calc_hook_btn.config(command=lambda: calc_hook(args))
+        calc_args = [self.qs, self.size]
+        draw_args = [self.size]
+        self.calc_hook_btn.config(command=lambda: calc_hook(calc_args))
+        self.draw_hook_btn.config(command=lambda: draw_hook(draw_args))
+        self.show_close_hook_btn.config(command=show_close_hook)
 
     def get_q(self):
         return self.qs
@@ -121,41 +143,25 @@ class Gui:
         self.root.mainloop()
 
 
-def draw():
-    global safe_radius
-    try:
-        print('drawing')
-        results = get_results_fun('potentials/modules/calc/' + calc_filename)
-        res, safe_zones = results
-        real_size = len(res[0]), len(res)
-
-        new_plt = draw_fun(res, real_size, safe_zones, safe_radius, n)
-        # callback_draw(new_plt)
-    except Exception as ex:
-        print(ex)
-
-
 def run_app():
-    gui = Gui(Hook(calculate).run)
+    gui = Gui(
+        Hook(calculate).run,
+        Hook(draw).run
+    )
     gui.run()
 
 
-def loop():
-    # TODO: перехват сообщений и отправка уведомлений в gui
-    while True:
-        if callback_b and not ():
-            callback_b = False
-            pass
-
-        time.sleep(0.1)
-
-    pass
-
-
-main_loop = Thread(target=loop)
 app = Thread(target=run_app)
 app.start()
-app.join()
+while True:
+    try:
+        print(1)
+        if show_plot_b:
+            plot.show()
+            show_plot_b = False
 
+        time.sleep(1)
+    except Exception as ex:
+        print(ex)
 # в круге крутиться проверка хуков нет, хук должен запускать функцию в отдельном потоке
 # возврат проверяется в кругу

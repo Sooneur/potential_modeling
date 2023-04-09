@@ -4,7 +4,8 @@ import numpy as np
 
 
 def new_draw(potentials: list, real_size: tuple, safe_zones: list, safe_radius: int, n: int):
-    # width, height = pic_size = len(potentials), len(potentials[0])
+    # TODO: width и height + доп параметры для просмотра отдельной части графика
+    width, height = real_size
     width_m, height_m = real_size
     max_p = 0
     min_p = 0

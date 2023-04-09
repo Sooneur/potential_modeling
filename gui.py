@@ -1,4 +1,4 @@
-import tkinter
+from mttkinter import mtTkinter as tkinter
 from tkinter import ttk
 from PIL import Image, ImageTk
 
@@ -96,7 +96,7 @@ def init(self):
 
     self.calc_hook_btn = tkinter.Button(self.data_frame, text='calc_hook')
     self.calc_hook_btn.grid()
-    self.draw_hook = tkinter.Button(self.data_frame, text='draw_hook')
-    self.draw_hook.grid()
-    self.show_close_hook = tkinter.Button(self.data_frame, text='show_close_hook')
-    self.show_close_hook.grid()
+    self.draw_hook_btn = tkinter.Button(self.data_frame, text='draw_hook')
+    self.draw_hook_btn.grid()
+    self.show_close_hook_btn = tkinter.Button(self.data_frame, text='show_close_hook')
+    self.show_close_hook_btn.grid()
