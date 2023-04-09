@@ -1,9 +1,9 @@
+import time
 from threading import Thread
 
 from PIL import ImageTk
 
-from potentials.config import draw_fun, get_results_fun
-from calculator import calc
+from potentials.config import draw_fun, get_results_fun, get_min_range, potential
 
 from gui import init
 
@@ -16,27 +16,63 @@ k = 1
 safe_radius = 10
 n = 10
 plot = None
+potentials = None
+safe_zones = None
 show_plot_b = False
 calculate_b = False
 draw_plot_b = False
+callback_b = False
+
+
+def callback():
+    callback_b = True
+
+
+def calculate(qs: dict, size: tuple):
+    global potentials, safe_zones, safe_radius
+    if not qs:
+        raise Exception
+    width, height = size
+    potentials = [([0] * width) for _ in range(height)]
+    safe_zones = [([0] * width) for _ in range(height)]
+
+    cords = qs.keys()
+
+    for x in range(width):
+        for y in range(height):
+
+            if (x, y) in cords:
+                if qs[x, y] > 0:
+                    potentials[y][x] = "+"
+                else:
+                    potentials[y][x] = "-"
+                safe_zones[y][x] = 0
+                continue
+            potentials[y][x] = potential(qs, (x, y), safe_radius)
+            # TODO: safe_zones как побочный продукт potentials
+            safe_zones[y][x] = get_min_range(qs, (x, y))
+    # TODO: отправка сообщений в круг
+
+    callback()
 
 
 class Hook:
+
     def __init__(self, target):
         self.target = target
         # self.break_e = break_e
 
     def run(self, args):
         self.thread = Thread(target=self.target, args=args)
-        self.thread.join()
-        print(self.thread)
+        self.thread.start()
 
 
 class Gui:
 
     def __init__(self, calc_hook):
         init(self)
-        self.calc_hook_btn.config(command=calc_hook)
+        args = [self.qs, self.size]
+        self.calc_hook_btn.config(command=lambda: calc_hook(args))
 
     def get_q(self):
         return self.qs
@@ -99,20 +135,24 @@ def draw():
         print(ex)
 
 
-# def loop():
-#     global show_plot
-#     while True:
-#         sleep(3)
-#         if show_plot:
-#             show_plot = False
-
-
 def run_app():
-    gui = Gui(Hook(calc).run)
+    gui = Gui(Hook(calculate).run)
     gui.run()
 
 
-# loop = Thread(target=loop)
+def loop():
+    # TODO: перехват сообщений и отправка уведомлений в gui
+    while True:
+        if callback_b and not ():
+            callback_b = False
+            pass
+
+        time.sleep(0.1)
+
+    pass
+
+
+main_loop = Thread(target=loop)
 app = Thread(target=run_app)
 app.start()
 app.join()

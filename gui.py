@@ -1,4 +1,3 @@
-from threading import Thread
 import tkinter
 from tkinter import ttk
 from PIL import Image, ImageTk
@@ -6,7 +5,7 @@ from PIL import Image, ImageTk
 
 def init(self):
     self.qs = {}
-    self.im_w, self.im_h = 600, 600
+    self.size = self.im_w, self.im_h = 600, 600
     self.image = Image.new('RGB', (self.im_w, self.im_h), 'white')
     # self.image = Image.open('0.png')
     self.root = tkinter.Tk()
@@ -95,5 +94,9 @@ def init(self):
                                      width=10, command=self.resize)
     self.resize_btn.grid(row=1, column=2)
 
-    self.calc_hook_btn = tkinter.Button(self.data_frame, text='123')
+    self.calc_hook_btn = tkinter.Button(self.data_frame, text='calc_hook')
     self.calc_hook_btn.grid()
+    self.draw_hook = tkinter.Button(self.data_frame, text='draw_hook')
+    self.draw_hook.grid()
+    self.show_close_hook = tkinter.Button(self.data_frame, text='show_close_hook')
+    self.show_close_hook.grid()

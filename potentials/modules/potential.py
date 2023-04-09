@@ -1,5 +1,5 @@
-def potential(qs: dict, point_cords: tuple, radius_e: float, k: float):
-    """Значение потенциала в точке"""
+def potential(qs: dict, point_cords: tuple, radius_e: float):
+    """Значение потенциала в точке(безразмеренное)"""
     cords = qs.keys()
     p_x, p_y = point_cords
 
@@ -15,6 +15,6 @@ def potential(qs: dict, point_cords: tuple, radius_e: float, k: float):
         q = qs[cord]
         r = ((x - xq) ** 2 + (y - yq) ** 2) ** 0.5
 
-        f += k * q / r
+        f += q / r
 
     return round(f, 5)
