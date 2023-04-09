@@ -1,7 +1,12 @@
 import time
+import tkinter
 from threading import Thread
-
+import matplotlib.pyplot as plot
+import numpy as np
 from PIL import ImageTk
+from matplotlib import cm
+from matplotlib.backends._backend_tk import NavigationToolbar2Tk
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 from potentials.config import draw_fun, get_results_fun, get_min_range, potential
 
@@ -14,7 +19,8 @@ radius_e = 0.4
 k = 1
 safe_radius = 10
 n = 10
-plot = None
+fig = None
+ax = None
 potentials = None
 safe_zones = None
 show_plot_b = False
@@ -26,19 +32,17 @@ def callback():
     pass
 
 
-def show_close_hook():
-    global show_plot_b
-    # TODO: просьба закрыть окно графика, если оно открыто
-
-    show_plot_b = not show_plot_b
+# def show_close_hook():
+#     global plot
+#     plot.show()
 
 
 def draw(real_size):
-    global potentials, safe_zones, safe_radius, plot
+    global potentials, safe_zones, safe_radius
     try:
         # TODO: уведомление(подтверждение отрисовки) + проверка на наличие графика
         print('drawing')
-        plot = draw_fun(potentials, real_size, safe_zones, safe_radius, n)
+        fig, ax = draw_fun(potentials, real_size, safe_zones, safe_radius, n)
         print('drawn')
         callback()
     except Exception as ex:
@@ -86,6 +90,11 @@ class Hook:
         self.thread.start()
 
 
+# def draw_plot():
+#     global plot
+#     plot.show()
+
+
 class Gui:
     # TODO: создать систему уведомлений
     def __init__(self, calc_hook, draw_hook):
@@ -94,7 +103,7 @@ class Gui:
         draw_args = [self.size]
         self.calc_hook_btn.config(command=lambda: calc_hook(calc_args))
         self.draw_hook_btn.config(command=lambda: draw_hook(draw_args))
-        self.show_close_hook_btn.config(command=show_close_hook)
+        self.show_close_hook_btn.config(command=self.draw_plot)
 
     def get_q(self):
         return self.qs
@@ -132,6 +141,70 @@ class Gui:
         self.photo = ImageTk.PhotoImage(self.image)
         self.canvas.create_image(0, 0, anchor='nw', image=self.photo)
 
+    def draw_plot(self):
+        global potentials, safe_zones
+        real_size = self.size
+        # TODO: width и height + доп параметры для просмотра отдельной части графика
+        width, height = real_size
+        width_m, height_m = real_size
+        max_p = 0
+        min_p = 0
+        values = []
+        contours = []
+        for y in range(height_m):
+            for x in range(width_m):
+                if potentials[y][x] not in ('+', '-'):
+                    if min_p > float(potentials[y][x]):
+                        min_p = float(potentials[y][x])
+                    if max_p < float(potentials[y][x]):
+                        max_p = float(potentials[y][x])
+        # TODO: Переписать на максимумах и минимумах
+        for y in range(height_m):
+            for x in range(width_m):
+
+                if safe_zones[y][x] == 0:
+                    if potentials[y][x] == '+':
+                        potentials[y][x] = max_p
+                    elif potentials[y][x] == '-':
+                        potentials[y][x] = min_p
+                    continue
+
+                if safe_zones[y][x] <= safe_radius:
+                    if float(potentials[y][x]) > 0:
+                        potentials[y][x] = max_p
+                    else:
+                        potentials[y][x] = min_p
+                    continue
+
+                values.append(float(potentials[y][x]))
+                potentials[y][x] = float(potentials[y][x])
+
+        max_v, min_v = max(values), min(values)
+        step = (max_v - min_v) / n
+        for i in range(n):
+            contours.append(step * i + min_v)
+
+        X = np.arange(0, width, 1)
+        Y = np.arange(0, height, 1)
+        potentials = np.array(potentials)
+        Z = potentials[Y][X]
+        X, Y = np.meshgrid(X, Y)
+
+        fig, ax = plot.subplots(subplot_kw={"projection": "3d"}, )
+        canvas = FigureCanvasTkAgg(fig, self.root)  # A tk.DrawingArea.
+        canvas.draw()
+        # ax.plot_surface(X, Y, Z, cmap=cm.coolwarm)
+        ax.contour(X, Y, Z, contours, cmap=cm.coolwarm, alpha=1)
+
+        ax.set(xlim=(width * 0 + int(width * 0.0) + 25, width + int(width * -0.0) + 50),
+               ylim=(height * 0 + int(height * 0.0), height + int(height * 0.0)))
+        ax.set_xlabel("X")
+        ax.set_ylabel("Y")
+        ax.set_zlabel("Potential")
+        toolbar = NavigationToolbar2Tk(canvas)
+        toolbar.update()
+        canvas.get_tk_widget().pack()
+
     def resize(self):
         # TODO: сделать функцию
         pass
@@ -153,15 +226,6 @@ def run_app():
 
 app = Thread(target=run_app)
 app.start()
-while True:
-    try:
-        print(1)
-        if show_plot_b:
-            plot.show()
-            show_plot_b = False
 
-        time.sleep(1)
-    except Exception as ex:
-        print(ex)
 # в круге крутиться проверка хуков нет, хук должен запускать функцию в отдельном потоке
 # возврат проверяется в кругу

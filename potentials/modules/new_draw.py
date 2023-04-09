@@ -44,9 +44,11 @@ def new_draw(potentials: list, real_size: tuple, safe_zones: list, safe_radius: 
     for i in range(n):
         contours.append(step * i + min_v)
 
+
     X = np.arange(0, width, 1)
     Y = np.arange(0, height, 1)
     potentials = np.array(potentials)
+    print(1)
     Z = potentials[Y][X]
     X, Y = np.meshgrid(X, Y)
 
@@ -60,5 +62,4 @@ def new_draw(potentials: list, real_size: tuple, safe_zones: list, safe_radius: 
     ax.set_xlabel("X")
     ax.set_ylabel("Y")
     ax.set_zlabel("Potential")
-    # plt.show()
-    return plot
+    return fig, ax
