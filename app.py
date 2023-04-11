@@ -7,7 +7,7 @@ from matplotlib import cm
 from matplotlib.backends._backend_tk import NavigationToolbar2Tk
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
-from potentials.config import draw_fun, get_min_range, potential
+from potentials.config import get_min_range, potential
 
 from gui import init
 
@@ -202,11 +202,11 @@ class MainWindow:
 
     def redraw(self):
         pixels = self.image.load()
-        for key in self.qs.keys():
-            if self.qs[key] > 0:
-                pixels[key] = 255, 0, 0
+        for q_key in self.qs.keys():
+            if self.qs[q_key] > 0:
+                pixels[q_key] = 255, 0, 0
             else:
-                pixels[key] = 0, 0, 255
+                pixels[q_key] = 0, 0, 255
 
         self.photo = ImageTk.PhotoImage(self.image)
         self.canvas.create_image(0, 0, anchor='nw', image=self.photo)
