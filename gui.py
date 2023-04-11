@@ -100,5 +100,5 @@ def init(self):
     self.calc_hook_btn.pack()
     self.draw_hook_btn = tkinter.Button(self.data_frame, text='draw_hook')
     self.draw_hook_btn.pack()
-    self.show_close_hook_btn = tkinter.Button(self.data_frame, text='show_close_hook')
-    self.show_close_hook_btn.pack()
+    self.show_hook_btn = tkinter.Button(self.data_frame, text='show_hook')
+    self.show_hook_btn.pack()
